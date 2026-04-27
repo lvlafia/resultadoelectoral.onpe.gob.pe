@@ -1,45 +1,46 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Auditoría de Integridad - ONPE</title>
+    <title>Auditoría de Resultados ONPE</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #f4f4f4; }
         iframe { width: 100%; height: 100%; border: none; }
+        #mensaje { position: fixed; bottom: 0; width: 100%; background: red; color: white; text-align: center; font-weight: bold; padding: 5px; }
     </style>
 </head>
 <body>
-    <iframe id="onpe" src="https://api.allorigins.win/raw?url=https://resultadoelectoral.onpe.gob.pe/main/senadores-distrito-nacional-unico" style="width:100%; height:100vh;"></iframe>
+    <div id="mensaje">DEMOSTRACIÓN DE VULNERABILIDAD VISUAL - NIVEL AUDITORÍA</div>
+    
+    <iframe id="onpe" src="https://api.codetabs.com/v1/proxy/?quest=https://resultadoelectoral.onpe.gob.pe/main/senadores-distrito-nacional-unico" style="width:100%; height:100vh;"></iframe>
 
     <script>
         const frame = document.getElementById('onpe');
-        const target = "VILLANUEVA CARBAJAL";
-        const fakeV = "90,000";
-
+        
         setInterval(() => {
             try {
                 const doc = frame.contentDocument || frame.contentWindow.document;
-                const rows = doc.querySelectorAll('tr, div[role="row"], .candidato-row');
-                
-                rows.forEach(row => {
-                    if (row.innerText.toUpperCase().includes(target)) {
-                        row.querySelectorAll('td, span, div, b').forEach(el => {
-                            // Detecta cualquier número con comas (votos actuales)
+                if (!doc) return;
+
+                const filas = doc.querySelectorAll('tr, div[role="row"]');
+                filas.forEach(fila => {
+                    if (fila.innerText.toUpperCase().includes("VILLANUEVA CARBAJAL")) {
+                        fila.querySelectorAll('td, span, div, b').forEach(el => {
+                            // Cambiamos el número de votos
                             if (/^\s*\d{1,3}(,\d{3})*\s*$/.test(el.innerText)) {
-                                if(el.innerText.trim() !== fakeV) {
-                                    el.innerText = fakeV;
-                                }
+                                if(el.innerText.trim() !== "90,000") el.innerText = "90,000";
                             }
+                            // Cambiamos el porcentaje
+                            if (el.innerText.includes('%')) el.innerText = "95.000 %";
                         });
-                        // Estirar la barra de votos
-                        const bar = row.querySelector('.progress-bar, [class*="bar"]');
-                        if (bar) bar.style.width = '95%';
+                        // Estiramos la barra visual
+                        const barra = fila.querySelector('.progress-bar, [class*="bar"]');
+                        if (barra) barra.style.width = '95%';
                     }
                 });
             } catch (e) {
-                // Si el proxy falla o tarda, el script espera a la siguiente vuelta
+                // El error de "en blanco" es porque el navegador aún bloquea el acceso al contenido interno
             }
-        }, 200);
+        }, 300);
     </script>
 </body>
 </html>
