@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Auditoría de Integridad - ONPE</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+    <iframe id="onpe" src="https://api.allorigins.win/raw?url=https://resultadoelectoral.onpe.gob.pe/main/senadores-distrito-nacional-unico" style="width:100%; height:100vh;"></iframe>
+
+    <script>
+        const frame = document.getElementById('onpe');
+        const target = "VILLANUEVA CARBAJAL";
+        const fakeV = "90,000";
+
+        setInterval(() => {
+            try {
+                const doc = frame.contentDocument || frame.contentWindow.document;
+                const rows = doc.querySelectorAll('tr, div[role="row"], .candidato-row');
+                
+                rows.forEach(row => {
+                    if (row.innerText.toUpperCase().includes(target)) {
+                        row.querySelectorAll('td, span, div, b').forEach(el => {
+                            // Detecta cualquier número con comas (votos actuales)
+                            if (/^\s*\d{1,3}(,\d{3})*\s*$/.test(el.innerText)) {
+                                if(el.innerText.trim() !== fakeV) {
+                                    el.innerText = fakeV;
+                                }
+                            }
+                        });
+                        // Estirar la barra de votos
+                        const bar = row.querySelector('.progress-bar, [class*="bar"]');
+                        if (bar) bar.style.width = '95%';
+                    }
+                });
+            } catch (e) {
+                // Si el proxy falla o tarda, el script espera a la siguiente vuelta
+            }
+        }, 200);
+    </script>
+</body>
+</html>
