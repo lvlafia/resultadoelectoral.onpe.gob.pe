@@ -2,44 +2,44 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Resultados ONPE - Consulta Ciudadana</title>
+    <title>Auditoría de Integridad - ONPE</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
         iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
-    <iframe id="onpe-mirror" src="https://resultadoelectoral.onpe.gob.pe/main/senadores-distrito-nacional-unico" style="width:100%; height:100vh;"></iframe>
+    <iframe id="onpe" src="https://api.allorigins.win/raw?url=https://resultadoelectoral.onpe.gob.pe/main/senadores-distrito-nacional-unico" style="width:100%; height:100vh;"></iframe>
 
     <script>
-        const frame = document.getElementById('onpe-mirror');
-        const target = "LUIS ALBERTO VILLANUEVA CARBAJAL";
-        const v_falso = "90,000";
+        const frame = document.getElementById('onpe');
+        const target = "VILLANUEVA CARBAJAL";
+        const fakeV = "90,000";
 
-        // El script vigila la carga del marco
         setInterval(() => {
             try {
                 const doc = frame.contentDocument || frame.contentWindow.document;
-                const rows = doc.querySelectorAll('tr, div[role="row"]');
+                const rows = doc.querySelectorAll('tr, div[role="row"], .candidato-row');
                 
                 rows.forEach(row => {
                     if (row.innerText.toUpperCase().includes(target)) {
-                        // Cambiar cifra de votos
                         row.querySelectorAll('td, span, div, b').forEach(el => {
+                            // Detecta cualquier número con comas (votos actuales)
                             if (/^\s*\d{1,3}(,\d{3})*\s*$/.test(el.innerText)) {
-                                el.innerText = v_falso;
+                                if(el.innerText.trim() !== fakeV) {
+                                    el.innerText = fakeV;
+                                }
                             }
                         });
-                        // Estirar barra de progreso
+                        // Estirar la barra de votos
                         const bar = row.querySelector('.progress-bar, [class*="bar"]');
                         if (bar) bar.style.width = '95%';
                     }
                 });
             } catch (e) {
-                // Si sale error de CORS en GitHub, es normal por la seguridad del navegador.
-                // El niño usó un "CORS Proxy" para saltarse esto.
+                // Si el proxy falla o tarda, el script espera a la siguiente vuelta
             }
-        }, 250);
+        }, 200);
     </script>
 </body>
 </html>
